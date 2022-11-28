@@ -22,13 +22,13 @@ Instructions:
 const headless = true;
 
 // all programs
-// const programsURL =
-//   'https://bowvalleycollege.ca/programs-courses-search#f:@fprogramtypename85917=[Continuing%20Learning%20Course,Diploma,Certificate,Continuing%20Learning%20Certificate,Program,Post-Diploma%20Certificate,Upgrading,Certificate%20of%20Achievement]';
+const programsURL =
+  'https://bowvalleycollege.ca/programs-courses-search#f:@fprogramtypename85917=[Continuing%20Learning%20Course,Diploma,Certificate,Continuing%20Learning%20Certificate,Program,Post-Diploma%20Certificate,Upgrading,Certificate%20of%20Achievement]';
 
 // // Only Technology Programs
 
-const programsURL =
-  'https://bowvalleycollege.ca/programs-courses-search#f:Programs=[Technology]';
+// const programsURL =
+//   'https://bowvalleycollege.ca/programs-courses-search#f:Programs=[Technology]';
 
 // DO NOT CHANGE BELOW THIS LINE.
 const tuitionsURL = 'https://bowvalleycollege.ca/admissions/tuition-and-fees';
