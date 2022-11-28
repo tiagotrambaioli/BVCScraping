@@ -11,3 +11,5 @@ execute node server on terminal
 the files will be created in files folder after execution ends.
 
 To make changes, read https://pptr.dev/ first
+
+A messy code that works, sorry about that, but I was in a rush... =P
