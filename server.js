@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer';
 import fs from 'fs';
 import axios from 'axios';
+import crypto from 'crypto';
 
 /*
 
@@ -64,8 +65,7 @@ async function getPrograms() {
   }
 
   for (let i = 0; i < programs.length; i++) {
-    const id = lastid + 1;
-    lastid++;
+    const uuid = crypto.randomUUID();
     const element = programs[i];
 
     // program title
@@ -90,7 +90,7 @@ async function getPrograms() {
     } catch {
       url = 'n/a';
       console.log(
-        'Please check if the program has a url on the official website, otherwise the css was probably changed.\n',
+        `Please check if the program ${title} has a url on the official website, otherwise the css was probably changed.\n`,
       );
     }
 
@@ -103,12 +103,12 @@ async function getPrograms() {
     } catch {
       type = 'n/a';
       console.log(
-        'Please check if the program has a type on the official website, otherwise the css was probably changed.\n',
+        `Please check if the program ${title} has a type on the official website, otherwise the css was probably changed.\n`,
       );
     }
 
     // add to list
-    programList.push({ id, title, url, type });
+    programList.push({ uuid, title, url, type });
   } // end of programs outer for loop
 
   console.log(
@@ -136,7 +136,6 @@ async function getProgramDetails() {
     duration,
     category,
     startDate = [];
-  let lastid;
   // navigate to each program url to collect details
   for (let i = 0; i < programList.length; i++) {
     await page.goto(programList[i].url);
@@ -210,7 +209,7 @@ async function getProgramDetails() {
     // program delivery types
     programList[i].deliveryTypes = [];
     try {
-      const programId = programList[i].id;
+      const programUUID = programList[i].uuid;
       const programTitle = programList[i].title;
       const deliveryTypes = await page.$$eval(
         '.program-item-list > ul.lightblue > li',
@@ -219,7 +218,7 @@ async function getProgramDetails() {
         },
       );
       deliveryTypes.forEach((type) => {
-        programDeliveryType.push({ programId, programTitle, type });
+        programDeliveryType.push({ programUUID, programTitle, type });
         programList[i].deliveryTypes.push(type);
       });
     } catch {
@@ -234,7 +233,7 @@ async function getProgramDetails() {
       const terms = await page.$$('h5:has([data-parent^="#accordion-item-"])');
       // inner for loop 4 matches terms with current program details page
       for (let l = 0; l < terms.length; l++) {
-        const programId = programList[i].id;
+        const programUUID = programList[i].uuid;
         const programTitle = programList[i].title;
         const element = terms[l];
         let courseCode = await element.$eval(
@@ -252,7 +251,7 @@ async function getProgramDetails() {
         );
         term = Number(term.split('-', 5)[2]) + 1;
         programTerms.push({
-          programId,
+          programUUID,
           programTitle,
           term,
           courseCode,
@@ -448,7 +447,7 @@ async function getProgramTuition() {
   // add program terms courses and tuition to programs
   for (let k = 0; k < programList.length; k++) {
     const item = programList[k];
-    let terms = programTerms.filter((term) => term.programId == item.id);
+    let terms = programTerms.filter((term) => term.programUUID == item.uuid);
     item.terms = terms.map((term) => {
       return {
         credits: term.credits,
@@ -522,6 +521,17 @@ fs.writeFile(
   },
 );
 
+// fill courses.json file
+fs.writeFile(
+  `./files/courses.json`,
+  JSON.stringify(courseTuition, null, 2),
+  (err) => {
+    if (err) console.log(err);
+  },
+);
+
+/* #### OPTIONAL FILES, UNCOMMENT IF YOU WANT THEM. #### */
+
 // fill programDelivery.json file with program delivery types matching programs
 // fs.writeFile(
 //   `programDelivery.json`,
@@ -548,14 +558,5 @@ fs.writeFile(
 //     if (err) console.log(err);
 //   },
 // );
-
-// fill coursesTuition.json file with program terms matching programs
-fs.writeFile(
-  `./files/courses.json`,
-  JSON.stringify(courseTuition, null, 2),
-  (err) => {
-    if (err) console.log(err);
-  },
-);
 
 console.log('Have fun with your data!!! Cya =) - Tiago Trambaioli');
