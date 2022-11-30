@@ -121,7 +121,6 @@ async function getPrograms() {
     await page.waitForNetworkIdle({ waitUntil: 'networkidle0' });
     console.log('..... reading.');
   } catch (error) {
-    console.log('Finishing... ');
     nextButton = false;
     console.log(`Total of programs collected: ${programList.length}`);
     return error;
@@ -319,8 +318,8 @@ async function getProgramTuition() {
         if (index >= 0) {
           programList[index].tuition = {
             period: tableTabsTitle[0].split(' ', 1)[0],
-            Domestic: program.totalDomesticTuition,
-            International: program.totalInternationalTuition,
+            domestic: program.totalDomesticTuition,
+            international: program.totalInternationalTuition,
           };
         }
         program = {};
@@ -420,8 +419,8 @@ async function getProgramTuition() {
       courseCredits,
       tuition: {
         period: tableTabsTitle[0].split(' ', 1)[0],
-        Domestic: tuitionDomestic,
-        International: tuitionInternational,
+        domestic: tuitionDomestic,
+        international: tuitionInternational,
       },
     });
 
@@ -437,8 +436,8 @@ async function getProgramTuition() {
         item.credits = courseCredits;
         item.tuition = {
           period: tableTabsTitle[0].split(' ', 1)[0],
-          Domestic: tuitionDomestic,
-          International: tuitionInternational,
+          domestic: tuitionDomestic,
+          international: tuitionInternational,
         };
       }
     }
@@ -479,7 +478,7 @@ async function getOutlines() {
         academicYear: item.AcademicYear,
         effectiveStartTerm: item.EffectiveStartTerm,
         effectiveTermEnd: item.EffectiveTermEnd,
-        URL: `https://bowvalleycollege.ca${item.URL}`,
+        url: `https://bowvalleycollege.ca${item.URL}`,
       };
     });
   }
@@ -495,7 +494,7 @@ async function getOutlines() {
           academicYear: item.AcademicYear,
           effectiveStartTerm: item.EffectiveStartTerm,
           effectiveTermEnd: item.EffectiveTermEnd,
-          URL: `https://bowvalleycollege.ca${item.URL}`,
+          url: `https://bowvalleycollege.ca${item.URL}`,
         };
       });
     });
@@ -559,4 +558,5 @@ fs.writeFile(
 //   },
 // );
 
+console.log('Finishing... ');
 console.log('Have fun with your data!!! Cya =) - Tiago Trambaioli');
