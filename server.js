@@ -412,8 +412,9 @@ async function getProgramTuition() {
         return Number(element.textContent);
       },
     );
-
+    const uuid = crypto.randomUUID();
     courseTuition.push({
+      uuid,
       courseCode,
       courseName,
       courseCredits,
