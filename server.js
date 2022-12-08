@@ -23,18 +23,15 @@ Instructions:
 const headless = true;
 
 // all programs
-const programsURL =
-  'https://bowvalleycollege.ca/programs-courses-search#f:@fprogramtypename85917=[Continuing%20Learning%20Course,Diploma,Certificate,Continuing%20Learning%20Certificate,Program,Post-Diploma%20Certificate,Upgrading,Certificate%20of%20Achievement]';
+const programsURL = 'https://bowvalleycollege.ca/programs-courses-search#f:@fprogramtypename85917=[Continuing%20Learning%20Course,Diploma,Certificate,Continuing%20Learning%20Certificate,Program,Post-Diploma%20Certificate,Upgrading,Certificate%20of%20Achievement]';
 
 // // Only Technology Programs
 
-// const programsURL =
-//   'https://bowvalleycollege.ca/programs-courses-search#f:Programs=[Technology]';
+// const programsURL = 'https://bowvalleycollege.ca/programs-courses-search#f:Programs=[Technology]';
 
 // DO NOT CHANGE BELOW THIS LINE.
 const tuitionsURL = 'https://bowvalleycollege.ca/admissions/tuition-and-fees';
-const outlinesURL =
-  'https://bowvalleycollege.ca/sitecore/api/courseoutline/CourseOutline/GetCourseOutlines?_=1669628262851';
+const outlinesURL = 'https://bowvalleycollege.ca/sitecore/api/courseoutline/CourseOutline/GetCourseOutlines?_=1669628262851';
 
 const programList = [];
 const courseList = [];
@@ -70,15 +67,10 @@ async function getPrograms() {
 
     // program title
     try {
-      title = await element.$eval(
-        '.my-result-template-header a',
-        (element) => element.innerText,
-      );
+      title = await element.$eval('.my-result-template-header a', (element) => element.innerText);
     } catch {
       title = 'n/a';
-      console.log(
-        'Please check if the program has a title on the official website, otherwise the css was probably changed.\n',
-      );
+      console.log('Please check if the program has a title on the official website, otherwise the css was probably changed.\n');
     }
 
     // program oficial url
@@ -89,31 +81,22 @@ async function getPrograms() {
       );
     } catch {
       url = 'n/a';
-      console.log(
-        `Please check if the program ${title} has a url on the official website, otherwise the css was probably changed.\n`,
-      );
+      console.log(`Please check if the program ${title} has a url on the official website, otherwise the css was probably changed.\n`);
     }
 
     // program type
     try {
-      type = await element.$eval(
-        '[data-field="@fprogramtypename85917"] > span',
-        (element) => element.innerText,
-      );
+      type = await element.$eval('[data-field="@fprogramtypename85917"] > span', (element) => element.innerText);
     } catch {
       type = 'n/a';
-      console.log(
-        `Please check if the program ${title} has a type on the official website, otherwise the css was probably changed.\n`,
-      );
+      console.log(`Please check if the program ${title} has a type on the official website, otherwise the css was probably changed.\n`);
     }
 
     // add to list
     programList.push({ uuid, title, url, type });
   } // end of programs outer for loop
 
-  console.log(
-    `Programs collected: ${programList.length}, searching for more...`,
-  );
+  console.log(`Programs collected: ${programList.length}, searching for more...`);
 
   try {
     nextButton = await page.$$eval('[title="Next"]', (el) => el.length);
@@ -134,6 +117,7 @@ async function getProgramDetails() {
   let subtitle,
     duration,
     category,
+    image,
     startDate = [];
   // navigate to each program url to collect details
   for (let i = 0; i < programList.length; i++) {
@@ -141,68 +125,56 @@ async function getProgramDetails() {
     try {
       await page.waitForSelector('.banner-content p');
     } catch {
-      console.log(
-        `Something wrong with progra ${programList[i]} details page.`,
-      );
+      console.log(`Something wrong with progra ${programList[i]} details page.`);
     }
     // await page.waitForNetworkIdle({ waitUntil: 'networkidle0' });
 
     // program subtitle
     try {
-      subtitle = await page.$eval(
-        '.banner-content p',
-        (element) => element.innerText,
-      );
+      subtitle = await page.$eval('.banner-content p', (element) => element.innerText);
       programList[i].subtitle = subtitle;
     } catch {
       programList[i].subtitle = 'n/a';
-      console.log(
-        `Please check if the program "${programList[i].title}" detail has a subtitle(short description) on the official website, otherwise the css was probably changed.\n`,
-      );
+      console.log(`Please check if the program "${programList[i].title}" detail has a subtitle(short description) on the official website, otherwise the css was probably changed.\n`);
     }
     // program duration
     try {
-      duration = await page.$eval(
-        '.header-variant-2',
-        (element) => element.innerText,
-      );
+      duration = await page.$eval('.header-variant-2', (element) => element.innerText);
       duration = duration.replace(/\s+/g, ' ').trim();
       programList[i].duration = duration;
     } catch {
       programList[i].duration = 'n/a';
-      console.log(
-        `Please check if the program "${programList[i].title}" detail has a duration on the official website, otherwise the css was probably changed.\n`,
-      );
+      console.log(`Please check if the program "${programList[i].title}" detail has a duration on the official website, otherwise the css was probably changed.\n`);
     }
 
     // program category
     try {
-      category = await page.$eval(
-        '.col-xs-12.col-sm-12 > h5 > a',
-        (element) => element.innerText,
-      );
+      category = await page.$eval('.col-xs-12.col-sm-12 > h5 > a', (element) => element.innerText);
       programList[i].category = category;
     } catch {
       programList[i].category = 'n/a';
-      console.log(
-        `Please check if the program "${programList[i].title}" detail has a category on the official website, otherwise the css was probably changed.\n`,
-      );
+      console.log(`Please check if the program "${programList[i].title}" detail has a category on the official website, otherwise the css was probably changed.\n`);
+    }
+
+    // program image
+    try {
+      image = await page.$eval('[style^="background-image: url"]', (element) => element.style.backgroundImage);
+      image = image.replace("'", '').replace('url("', 'https://www.bowvalleycollege.ca').replace('")', '');
+
+      programList[i].image = image;
+    } catch {
+      console.log(`Please check if the program "${programList[i].title}" detail has a background image on the official website, otherwise the css was probably changed.\n`);
     }
 
     // program start dates
     try {
-      const startDates = await page.$$eval(
-        '.icon-calendar ~ div.program-item-list > ul > li',
-        (items) => {
-          return items.map((item) => item.textContent);
-        },
-      );
+      const startDates = await page.$$eval('.icon-calendar ~ div.program-item-list > ul > li', (items) => {
+        return items.map((item) => item.textContent);
+      });
       programList[i].startdate = startDates;
     } catch {
       programList[i].startdate = [];
-      console.log(
-        'Please check if the program has a start date on the official website, otherwise the css was probably changed.\n',
-      );
+      console.log('Please check if the program has a start date on the official website, otherwise the css was probably changed.\n');
     }
 
     // program delivery types
@@ -210,21 +182,16 @@ async function getProgramDetails() {
     try {
       const programUUID = programList[i].uuid;
       const programTitle = programList[i].title;
-      const deliveryTypes = await page.$$eval(
-        '.program-item-list > ul.lightblue > li',
-        (items) => {
-          return items.map((item) => item.innerHTML.split('<', 1)[0]);
-        },
-      );
+      const deliveryTypes = await page.$$eval('.program-item-list > ul.lightblue > li', (items) => {
+        return items.map((item) => item.innerHTML.split('<', 1)[0]);
+      });
       deliveryTypes.forEach((type) => {
         programDeliveryType.push({ programUUID, programTitle, type });
         programList[i].deliveryTypes.push(type);
       });
     } catch {
       programList[i].startdate = [];
-      console.log(
-        'Please check if the program has a start date on the official website, otherwise the css was probably changed.\n',
-      );
+      console.log('Please check if the program has a start date on the official website, otherwise the css was probably changed.\n');
     }
 
     // program terms
@@ -235,19 +202,10 @@ async function getProgramDetails() {
         const programUUID = programList[i].uuid;
         const programTitle = programList[i].title;
         const element = terms[l];
-        let courseCode = await element.$eval(
-          'a',
-          (element) => element.innerText,
-        );
+        let courseCode = await element.$eval('a', (element) => element.innerText);
         courseCode = courseCode.split(' -', 1)[0];
-        let courseTitle = await element.$eval(
-          'a > span',
-          (element) => element.innerText,
-        );
-        let term = await element.$eval(
-          'a',
-          (element) => element.dataset.parent,
-        );
+        let courseTitle = await element.$eval('a > span', (element) => element.innerText);
+        let term = await element.$eval('a', (element) => element.dataset.parent);
         term = Number(term.split('-', 5)[2]) + 1;
         programTerms.push({
           programUUID,
@@ -283,12 +241,9 @@ async function getProgramTuition() {
     program = {};
   try {
     await page.waitForSelector('[role = "tablist"');
-    tableTabsTitle = await page.$$eval(
-      '[role = "tablist"] > li > a',
-      (items) => {
-        return items.map((item) => item.textContent);
-      },
-    );
+    tableTabsTitle = await page.$$eval('[role = "tablist"] > li > a', (items) => {
+      return items.map((item) => item.textContent);
+    });
   } catch {
     console.log(`Something wrong with Tuition & fees page...`);
   }
@@ -331,38 +286,26 @@ async function getProgramTuition() {
       });
 
       // Domestic tuition
-      program.totalDomesticTuition = await row.$eval(
-        'td:nth-of-type(10)',
-        (element) => {
-          return Number(element.textContent.replace(',', ''));
-        },
-      );
+      program.totalDomesticTuition = await row.$eval('td:nth-of-type(10)', (element) => {
+        return Number(element.textContent.replace(',', ''));
+      });
 
       // international tuition
-      program.totalInternationalTuition = await row.$eval(
-        'td:nth-of-type(11)',
-        (element) => {
-          return Number(element.textContent.replace(',', ''));
-        },
-      );
+      program.totalInternationalTuition = await row.$eval('td:nth-of-type(11)', (element) => {
+        return Number(element.textContent.replace(',', ''));
+      });
     }
 
     if (tds.length == 10) {
       // domestic tuition
-      program.totalDomesticTuition += await row.$eval(
-        'td:nth-of-type(9)',
-        (element) => {
-          return Number(element.textContent.replace(',', ''));
-        },
-      );
+      program.totalDomesticTuition += await row.$eval('td:nth-of-type(9)', (element) => {
+        return Number(element.textContent.replace(',', ''));
+      });
 
       // international tuition
-      program.totalInternationalTuition += await row.$eval(
-        'td:nth-of-type(10)',
-        (element) => {
-          return Number(element.textContent.replace(',', ''));
-        },
-      );
+      program.totalInternationalTuition += await row.$eval('td:nth-of-type(10)', (element) => {
+        return Number(element.textContent.replace(',', ''));
+      });
     }
     if (i == programRows.length - 1) {
       programTuiton.push(program);
@@ -406,12 +349,9 @@ async function getProgramTuition() {
       return Number(element.textContent);
     });
 
-    const tuitionInternational = await row.$eval(
-      'td:nth-of-type(5)',
-      (element) => {
-        return Number(element.textContent);
-      },
-    );
+    const tuitionInternational = await row.$eval('td:nth-of-type(5)', (element) => {
+      return Number(element.textContent);
+    });
     const uuid = crypto.randomUUID();
     courseTuition.push({
       uuid,
@@ -427,9 +367,7 @@ async function getProgramTuition() {
 
     // add tuition to course
 
-    let courseIndex = programTerms.filter(
-      (item) => item.courseCode == courseCode,
-    );
+    let courseIndex = programTerms.filter((item) => item.courseCode == courseCode);
 
     if (courseIndex.length > 0) {
       for (let z = 0; z < courseIndex.length; z++) {
@@ -471,9 +409,7 @@ async function getOutlines() {
 
   for (let i = 0; i < courseTuition.length; i++) {
     const item = courseTuition[i];
-    let courseOutlines = outlines.filter(
-      (outline) => outline.CourseCode == item.courseCode,
-    );
+    let courseOutlines = outlines.filter((outline) => outline.CourseCode == item.courseCode);
     item.outlines = courseOutlines.map((item) => {
       return {
         academicYear: item.AcademicYear,
@@ -487,9 +423,7 @@ async function getOutlines() {
   for (let i = 0; i < programList.length; i++) {
     const item = programList[i];
     item.terms.forEach((item) => {
-      let courseOutlines = outlines.filter(
-        (outline) => outline.CourseCode == item.courseCode,
-      );
+      let courseOutlines = outlines.filter((outline) => outline.CourseCode == item.courseCode);
       item.outlines = courseOutlines.map((item) => {
         return {
           academicYear: item.AcademicYear,
@@ -513,22 +447,14 @@ if (!fs.existsSync('./files')) {
 }
 
 // fill programs.json file with programList
-fs.writeFile(
-  `./files/programs.json`,
-  JSON.stringify(programList, null, 2),
-  (err) => {
-    if (err) console.log(err);
-  },
-);
+fs.writeFile(`./files/programs.json`, JSON.stringify(programList, null, 2), (err) => {
+  if (err) console.log(err);
+});
 
 // fill courses.json file
-fs.writeFile(
-  `./files/courses.json`,
-  JSON.stringify(courseTuition, null, 2),
-  (err) => {
-    if (err) console.log(err);
-  },
-);
+fs.writeFile(`./files/courses.json`, JSON.stringify(courseTuition, null, 2), (err) => {
+  if (err) console.log(err);
+});
 
 /* #### OPTIONAL FILES, UNCOMMENT IF YOU WANT THEM. #### */
 
